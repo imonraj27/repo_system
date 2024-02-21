@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FILE Uploaded Successfully</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+    <h1 class="m-2">YOUR FILE UPLOADED SUCCESSFULLY....</h1>
+    <h3 class="m-2">GOING BACK IN <span id="count"></span> Seconds</h3>
+    <button onclick="goBack()" class="m-2 btn btn-info">Go Back</button>
+    <script>
+        function goBack() {
+            window.location.href = "/";
+        }
+
+        let waittime = 5;
+
+        const count = document.getElementById('count')
+        count.innerHTML = waittime;
+
+        setTimeout(goBack, waittime * 1000);
+        let i = waittime
+        setInterval(() => {
+            i--;
+            count.innerHTML = i;
+        }, 1000)
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imon's Repo System</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        #all-images-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .single-image-wrapper {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+            justify-content: center;
+
+            border: 1px solid #888;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 100%;
+            background: #ccc;
+        }
+
+        .single-image-wrapper a {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        form,
+        #form {
+            padding: 10px;
+            border: 1px solid #999;
+            border-radius: 5px;
+            box-shadow: 0 0 10px #99f;
+            margin: 10px 0;
+        }
+
+        textarea {
+            resize: none;
+            height: 200px;
+        }
+
+        .success {
+            color: #009900;
+        }
+
+        .fail {
+            color: #990000;
+        }
+
+        #all-images-container {
+            margin: 10px 0;
+            border-radius: 7px;
+            padding: 10px;
+            border: 1px solid red;
+        }
+
+        nav.navbar {
+            background: linear-gradient(30deg, rgb(10, 0, 153), rgb(3, 122, 17));
+        }
+
+        a.navbar-brand {
+            font-family: 'Play', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #006 !important;
+            background: #fff;
+            padding: 4px 7px;
+            border-radius: 5px;
+            box-shadow: inset 0 0 10px -4px #00f;
+        }
+
+        .btn {
+            border-radius: 10px 0 10px 0;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+
+<body onload="getOrValidateUserId()">
+
+
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Imon's Repo System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    <a class="nav-link" href="#">Jadavpur</a>
+                    <a class="nav-link" href="#">University</a>
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+
+
+
+
+    <!-- -----------------inner container----------------- -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <!-- --------------FOR IMAGE FILE UPLOAD----------------------- -->
+                <form id="image-form" action="./upload" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Please Choose an Image File...</label>
+                        <input class="form-control" type="file" name="image" id="image-input">
+                    </div>
+                    <button class="btn btn-primary" type="submit" id="submit-button">SUBMIT</button>
+                </form>
+
+                <!-- -----------------FOR TEXT UPLOAD----------------------------------- -->
+                <div id="form">
+                    <div class="mb-3">
+                        <label for="text" class="form-label">Please Write Some Text Data...</label>
+                        <textarea class="form-control" name="text" id="text-input"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="submitTextData()" id="text-submit-button">SUBMIT</button>
+                    <div class="p-1" id="submission-status"></div>
+                </div>
+            </div>
+
+
+            <div class="col-md-6 mt-3">
+                <!-- ---------------to show uploaded stuffs------------------ -->
+                <button class="btn btn-danger" onclick="showAllPics()">Show All Pics</button>
+                <button class="btn btn-success" onclick="showAllTexts()">Show All Texts</button>
+                <button class="btn btn-secondary" onclick="showAllFiles()">Show All Files</button>
+                <div class="container-fluid" style="padding: 0;">
+                    <div id="all-images-container" class="row"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function getOrValidateUserId() {
+            if (!localStorage.getItem('userid')) {
+                $.ajax(
+                    {
+                        url: './getuserid',
+                        method: 'get',
+                        success: function (res) {
+                            localStorage.setItem('userid', res.userid)
+                            document.getElementById('image-form').action = "/" + localStorage.getItem('userid') + "/upload"
+                        }
+                    }
+                )
+            } else {
+                $.ajax({
+                    url: './' + localStorage.getItem('userid') + "/uploadtext",
+                    method: 'post',
+                    data: {
+                        'text': ""
+                    },
+                    success: function (res) {
+                        if (res.status != 'success') {
+                            $.ajax(
+                                {
+                                    url: './getuserid',
+                                    method: 'get',
+                                    success: function (res) {
+                                        localStorage.setItem('userid', res.userid)
+
+                                        document.getElementById('image-form').action = "/" + res.userid + "/upload"
+                                    }
+                                }
+                            )
+                        } else
+                            document.getElementById('image-form').action = "/" + localStorage.getItem('userid') + "/upload"
+
+                    }
+                })
+            }
+        }
+
+        function showAllPics() {
+            $.ajax(
+                {
+                    url: './' + localStorage.getItem('userid') + "/view",
+                    method: 'get',
+                    success: function (res) {
+                        document.getElementById('all-images-container').innerHTML = res;
+                    }
+                }
+            )
+        }
+
+        function showAllTexts() {
+            $.ajax(
+                {
+                    url: './' + localStorage.getItem('userid') + "/viewtext",
+                    method: 'get',
+                    success: function (res) {
+                        document.getElementById('all-images-container').innerHTML = "<h2 class='m-2'>All Texts</h2>";
+                        res.msg.forEach(element => {
+                            if (element.trim() != "")
+                                document.getElementById('all-images-container').innerHTML += `
+                            <span class='alert alert-primary'>${element}</span>
+                            `;
+                        });
+                    }
+                }
+            )
+        }
+
+        function showAllFiles() {
+            $.ajax(
+                {
+                    url: './' + localStorage.getItem('userid') + "/viewall",
+                    method: 'get',
+                    success: function (res) {
+                        document.getElementById('all-images-container').innerHTML = res;
+                    }
+                }
+            )
+        }
+
+        function submitTextData() {
+            let textdata = $('#text-input').val()
+            if (!textdata || textdata == "") {
+                alert("Please Enter some Data, then Send..")
+                return
+            }
+
+            $.ajax({
+                url: './' + localStorage.getItem('userid') + "/uploadtext",
+                method: 'post',
+                data: {
+                    'text': textdata
+                },
+                success: function (res) {
+                    if (res.status === 'success') {
+                        $('#submission-status').html(res.msg)
+                        $('#submission-status').removeClass('fail');
+                        $('#submission-status').addClass('success');
+                        $('#text-input').val("")
+                    } else {
+                        $('#submission-status').html(res.msg)
+                        $('#submission-status').removeClass('success');
+                        $('#submission-status').addClass('fail');
+                    }
+                }
+            })
+        }
+
+        $("#submit-button").on("click", function (e) {
+
+            e.preventDefault();
+            // return;
+            let fileInput = $("#image-input");
+            if (!fileInput.val()) {
+                alert("Please select an image to upload.");
+                return false;
+            }
+            let imgfile = fileInput[0].files[0];
+            // if (imgfile.type.split("/")[0] !== "image") {
+            // alert("Invalid file type. Please select an image.");
+            //     return false;
+            // }
+            if (imgfile.size > 40000000) {
+                alert("File size too large. Please select an image smaller than 5MB.");
+                return false;
+            }
+            $("#image-form").submit();
+
+        });
+
+    </script>
+</body>
+
+</html>
